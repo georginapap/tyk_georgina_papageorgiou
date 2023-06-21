@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - main
+env:
+  IMAGE_NAME: tyk-application
+  IMAGE_TAG: ${{ github.run_number }}
 
 jobs:
   build:
@@ -11,9 +14,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          tags: georginapap/tyk_georgina_papageorgiou:latest
+      - name: Build Docker image
+        run:
+          docker build --tag $IMAGE_NAME:$(date +%s) --file ./Dockerfile .
+
+#- name: Commit and push changes
+#        run: |
+#          git config --local user.email "action@github.com"
+#          git config --local user.name "GitHub Action"
+#          git commit -m "Your commit message"
+#          git push origin main
