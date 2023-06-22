@@ -45,3 +45,16 @@ To execute unit tests:
 ```
 python3 tests.py -v
 ```
+
+This project inplements the following user stories:
+
+As an SRE I want to know whether all the deployments in the k8s cluster have as many healthy pods as requested by the respective `Deployment` spec
+
+As an SRE I want to always know whether this tool can successfully communicate with the configured k8s API server
+
+As an application developer I want to build this application into a container image when I push a commit to the `main` branch of its repository
+
+
+Comments:
+
+
