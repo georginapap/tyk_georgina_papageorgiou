@@ -40,7 +40,6 @@ class AppHandler(BaseHTTPRequestHandler):
             v1 = client.AppsV1Api()
             deployments = v1.list_deployment_for_all_namespaces().items
             for deployment in deployments:
-#            print("Pod name: {}".format(deployment.metadata.name))
                 deployment_name = deployment.metadata.name
                 configured_replicas = deployment.spec.replicas
 
@@ -49,21 +48,9 @@ class AppHandler(BaseHTTPRequestHandler):
                 available_replicas = status.available_replicas
 
                 # Compare the available replicas with the desired replicas
-        #       if desired_replicas is not None and available_replicas != configured_replicas:
                 print(f"Deployment {deployment_name} has {available_replicas} available replicas out of {configured_replicas} configured.")
         except requests.exceptions.RequestException as e:
             return "Failed to connect to Kubernetes API and check the deployment status: {}".format(e)
-
-
-#    def get_pods(self):
-#        config.load_kube_config()
-#        # Create an instance of the Kubernetes API client
-#        v1 = client.CoreV1Api()
-        # Example: List all Pods in the default namespace
-#        pods = v1.list_namespaced_pod(namespace="default")
-
-#        for pod in pods.items:
-#            print("Pod name: {}".format(pod.metadata.name))
 
 
     def get_all_services(self):
@@ -83,7 +70,8 @@ class AppHandler(BaseHTTPRequestHandler):
     def check_api_status(self):
         """Checks the status of the Kubernetes API """
         try:
-            response = requests.get("http://127.0.0.1:8080/healthz")
+            config.load_kube_config()
+            response = requests.get("http://127.0.0.1:8080/")
             if response.status_code == 200:
                 return "Kubernetes API is reachable and healthy"
             else:
@@ -92,29 +80,17 @@ class AppHandler(BaseHTTPRequestHandler):
             return "Failed to connect to Kubernetes API: {}".format(e)
 
 
-
-#    def check_connectivity(self):
-#        """   """
-#        try:
-#            config.load_kube_config()
-#            v1 = client.CoreV1Api()
-#            pprint(v1)
-##            if v1.list_namespace():
-##            return True
-#                return 'Connected to k8s xAPI server'
-#        except ApiException as e:
-#            print(f"Error in k8s API connectivity {e}")
-#            return False
-
 def api_status_check():
-    """ """
+    """ 
+    Returns a message periodically for the status of K8s API connection.
+    """
     while True:
-        is_connected = check_connectivity()
+        is_connected = get_kubernetes_version()
 
         if is_connected:
-            return 'Connected to k8s API server'
+            print("Connected to k8s API server")
         else:
-            return 'Failed to connect to k8s API server'
+            print("Failed to connect to k8s API server")
 
         time.sleep(5)
 
@@ -144,5 +120,7 @@ def start_server(address):
 
     with socketserver.TCPServer((host, int(port)), AppHandler) as httpd:
         print("Server listening on {}".format(address))
+    #    api_status_check()
         httpd.serve_forever()
+
 
